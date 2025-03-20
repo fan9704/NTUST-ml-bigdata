@@ -10,7 +10,7 @@ print(df.info())
 # 描述資料集
 print(df.describe())
 # 處理遺漏值（如果有）
-df = df.dropna()
+df = df.fillna(0)
 # 轉換數據：計算 BMI（體重 / 身高^2）
 df['BMI'] = df['Weight (kg)'] / (df['Height (m)'] ** 2)
 # 聚合數據：計算不同類型寶可夢的平均 BMI
