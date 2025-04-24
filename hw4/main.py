@@ -56,12 +56,15 @@ y_pred_xgb = xgb.predict(X_test)
 # 9. 評估指標
 print("=== Logistic Regression ===")
 print(classification_report(y_test, y_pred_logreg))
+print()
 
 print("=== Random Forest ===")
 print(classification_report(y_test, y_pred_rf))
+print()
 
 print("=== XGBoost ===")
 print(classification_report(y_test, y_pred_xgb))
+print()
 
 # 計算評估指標 - Logistic Regression
 accuracy_logreg = accuracy_score(y_test, y_pred_logreg)
@@ -74,6 +77,7 @@ print(f"Accuracy: {accuracy_logreg}")
 print(f"Precision: {precision_logreg}")
 print(f"Recall: {recall_logreg}")
 print(f"F1-Score: {f1_logreg}")
+print()
 
 # 計算評估指標 - Random Forest
 accuracy_rf = accuracy_score(y_test, y_pred_rf)
@@ -86,6 +90,7 @@ print(f"Accuracy: {accuracy_rf}")
 print(f"Precision: {precision_rf}")
 print(f"Recall: {recall_rf}")
 print(f"F1-Score: {f1_rf}")
+print()
 
 # 計算評估指標 - XGBoost
 accuracy_xgb = accuracy_score(y_test, y_pred_xgb)
@@ -98,12 +103,13 @@ print(f"Accuracy: {accuracy_xgb}")
 print(f"Precision: {precision_xgb}")
 print(f"Recall: {recall_xgb}")
 print(f"F1-Score: {f1_xgb}")
+print()
 
 # 10. 檢查 XGBoost 是否過擬合
 # 使用交叉驗證評估模型穩定性
 cv_scores = cross_val_score(xgb, X_train, y_train, cv=5, scoring='accuracy')
 print(f"XGBoost 5折交叉驗證準確率: {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
-
+print()
 # 11. 特徵重要性比較
 plt.figure(figsize=(12, 10))
 
@@ -138,7 +144,7 @@ plt.ylim([min(accuracy_scores) * 0.95, 1.0])
 # 精確率比較
 plt.subplot(2, 2, 2)
 plt.bar(models, precision_scores, color=['blue', 'green', 'red'])
-plt.title('Comparison of accuracy') # 精確率比較
+plt.title('Precision Comparison') # 精確率比較
 plt.ylim([min(precision_scores) * 0.95, 1.0])
 
 # 召回率比較
