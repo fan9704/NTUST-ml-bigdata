@@ -8,14 +8,15 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "numpy (>=2.2.3,<3.0.0)",
+    "numpy (==2.1.0)",
     "pandas (>=2.2.3,<3.0.0)",
     "plotly (>=6.0.0,<7.0.0)",
     "scikit-learn (>=1.6.1,<2.0.0)",
     "statsmodels (>=0.14.4,<0.15.0)",
     "matplotlib (>=3.10.1,<4.0.0)",
     "seaborn (>=0.13.2,<0.14.0)",
-    "xgboost (>=3.0.0,<4.0.0)"
+    "xgboost (>=3.0.0,<4.0.0)",
+    "tensorflow (>=2.19.0,<3.0.0)"
 ]
 
 
