@@ -76,7 +76,7 @@ def load_and_balance_data(normal_path, abnormal_path, train_size=0.8, val_test_s
     y = data.iloc[:, -1].values
     
     X = X.reshape(X.shape[0], X.shape[1], 1)
-        class_counts = np.bincount(y)
+    class_counts = np.bincount(y)
     total_samples = len(y)
     class_weights = {
         0: total_samples / (2 * class_counts[0]),  # Normal
@@ -283,14 +283,6 @@ evaluate_and_plot(model, X_test, y_test)
 model.save('ecg_model.h5')  
 from tensorflow.keras.models import load_model
 model = load_model('best_model.keras') 
-model.summary()
-sample_input = X_test[0:1]  
-prediction = model.predict(sample_input)
-print(f"Prediction: {'Abnormal' if prediction > 0.5 else 'Normal'} ({prediction[0][0]:.2f})")
-
-evaluate_and_plot(model, X_test, y_test)
-from tensorflow.keras.models import load_model
-model = load_model('ecg_model.h5') 
 model.summary()
 sample_input = X_test[0:1]  
 prediction = model.predict(sample_input)
