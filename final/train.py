@@ -5,17 +5,19 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
+from keras.api import layers, models, callbacks, regularizers
+# from tensorflow.keras import layers, models, callbacks, regularizers
 import tensorflow as tf
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  
 
 folder_path = 'datasets'
 
-from tensorflow.keras import layers, models, callbacks
 for dirname, _, filenames in os.walk('datasets'):
     for filename in filenames:
         print(os.path.join(dirname, filename))
 
+# 載入資料集
 def load_data():
     normal = pd.read_csv(f"{folder_path}/ptbdb_normal.csv", header=None)
     abnormal = pd.read_csv(f"{folder_path}/ptbdb_abnormal.csv", header=None)
@@ -25,8 +27,10 @@ def load_data():
     
     return normal, abnormal, mitbih_train, mitbih_test
 
+# 取得 正常/異常 / 訓練資料集/測試資料集
 normal, abnormal, mitbih_train, mitbih_test = load_data()
 
+# 繪製正常/異常心電圖 一些樣本
 def plot_sample_ecgs(normal, abnormal, num_samples=3):
     plt.figure(figsize=(15, 8))
     plt.subplot(2, 1, 1)
@@ -46,9 +50,12 @@ def plot_sample_ecgs(normal, abnormal, num_samples=3):
     plt.legend()
     
     plt.tight_layout()
-    plt.show()
+    plt.show(block=False)
 
+# 繪製正常/異常心電圖 一些樣本
 plot_sample_ecgs(normal, abnormal)
+
+# 載入與平衡資料
 def load_and_balance_data(normal_path, abnormal_path, train_size=0.8, val_test_split=0.5, random_state=42):
     """
     Load and balance ECG data with train/val/test splits (80/10/10)
@@ -114,6 +121,7 @@ print(f"Class weights: {class_weights}")
 print(f"Train shapes: X={X_train.shape}, y={y_train.shape}")
 print(f"Test shapes: X={X_test.shape}, y={y_test.shape}")
 
+# 繪製訓練/驗證/測試資料集的類別分佈
 def plot_class_distribution(y_train, y_val, y_test):
     fig, ax = plt.subplots(1, 3, figsize=(15, 5))
     
@@ -130,12 +138,14 @@ def plot_class_distribution(y_train, y_val, y_test):
     ax[2].set_xticklabels(['Normal', 'Abnormal'])
     
     plt.tight_layout()
-    plt.show()
+    plt.show(block=False)
 
 plot_class_distribution(y_train, y_val, y_test)
 
-from tensorflow.keras import regularizers
 
+
+
+# 建立模型
 def build_model(input_shape):
     model = models.Sequential([
         # First Conv Block
@@ -207,6 +217,7 @@ history = model.fit(
     class_weight=class_weights,  
     callbacks=[early_stopping, model_checkpoint, reduce_lr],shuffle=True)
 
+# 繪製訓練/驗證準確率與損失
 def plot_history(history):
     plt.figure(figsize=(12, 4))
     
@@ -227,13 +238,15 @@ def plot_history(history):
     plt.legend()
     
     plt.tight_layout()
-    plt.show()
+    plt.show(block=False)
 
 plot_history(history)
 
 import seaborn as sns
 from sklearn.metrics import classification_report, confusion_matrix
 
+
+# 評估模型並繪製混淆矩陣
 def evaluate_and_plot(model, X_test, y_test):
     # 1. Model Evaluation
     print("\nEvaluating model on test set...")
@@ -260,7 +273,7 @@ def evaluate_and_plot(model, X_test, y_test):
     plt.title('Confusion Matrix')
     plt.ylabel('True Label')
     plt.xlabel('Predicted Label')
-    plt.show()
+    plt.show(block=False)
     
     plt.figure(figsize=(15, 10))
     for i in range(6):
@@ -277,10 +290,12 @@ def evaluate_and_plot(model, X_test, y_test):
         plt.xlabel('Time steps')
         plt.ylabel('Amplitude')
     plt.tight_layout()
-    plt.show()
+    plt.show(block=False)
 
 evaluate_and_plot(model, X_test, y_test)
 model.save('ecg_model.h5')  
+
+# 測試模型
 from tensorflow.keras.models import load_model
 model = load_model('best_model.keras') 
 model.summary()
