@@ -8,17 +8,23 @@ import numpy as np
 app = FastAPI()
 
 # 載入模型
-model = joblib.load("xgb_ecg_model.joblib")
+model = None
 
+@app.on_event("startup")
+def load_model():
+    global model
+    model = joblib.load("xgb_ecg_model.joblib")
+    print("Model loaded successfully.")
 # 定義輸入資料格式
 class ECGData(BaseModel):
     features: list[float]  # 預期是 187 維的 ECG 特徵
 
 # 建立 API 路由
-@app.post("/predict/")
+@app.post("/predict")
 def predict(data: ECGData):
     x = np.array(data.features).reshape(1, -1)
     pred = model.predict(x)
+    print(pred)
     return {"prediction": int(pred[0])}
 
 # Run the FastAPI app with Uvicorn
