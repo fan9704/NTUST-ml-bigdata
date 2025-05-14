@@ -5,3 +5,4 @@
 *.keras
 
 final/datasets/*.csv
+__pycache__
