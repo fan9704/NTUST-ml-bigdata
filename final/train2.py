@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 
 import os
 import warnings
+import joblib
 from multiprocessing import cpu_count
 n_cpu = cpu_count()
 plot_block = True
@@ -24,9 +25,12 @@ folder_path = "datasets"
 output_path = "train2_images"
 # 建立 output_path 資料夾
 os.makedirs(output_path, exist_ok=True)
+
+# 讀入資料
 abnormal = pd.read_csv(f"{folder_path}/ptbdb_abnormal.csv", header = None) 
 normal = pd.read_csv(f"{folder_path}/ptbdb_normal.csv", header = None)
 
+# 移除 label 欄位
 abnormal = abnormal.drop([187], axis=1)
 normal = normal.drop([187], axis=1)
 
@@ -74,25 +78,26 @@ for i in [0, 50, 117, 1111, 100]:
     plt.savefig(f"{output_path}/normal_{i}.png")
     plt.close()
 
+# 標籤建立
 y_abnormal = np.ones((abnormal.shape[0]))
 y_abnormal = pd.DataFrame(y_abnormal)
 
 y_normal = np.zeros((normal.shape[0]))
 y_normal = pd.DataFrame(y_normal)
-
+# 合併資料
 X = pd.concat([abnormal, normal], sort=True)
 y = pd.concat([y_abnormal, y_normal] ,sort=True)
-
+# 資料切分
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 print(abnormal.shape)
 print(normal.shape)
-
+# 缺失值檢查
 print(np.any(X_train.isna().sum()))
 print(np.any(X_test.isna().sum()))
 
 seed=123
-
+# 多模型比較
 classifiers = [
     LogisticRegression(class_weight='balanced', random_state=seed),
     KNeighborsClassifier(3, n_jobs=n_cpu),
@@ -109,31 +114,14 @@ from sklearn.metrics import precision_score, recall_score, accuracy_score, f1_sc
 from sklearn.utils.validation import column_or_1d
 
 for name, clf in zip(names, classifiers):
-    # y_train = column_or_1d(y_train, warn=True)
-    # clf.fit(X_train, y_train)
-    # print(f"{name}: {round(accuracy_score(y_test, clf.predict(X_test)),3)}")
     clf.fit(X_train, column_or_1d(y_train, warn=True))
-    print(f"{name}: {round(accuracy_score(y_test, clf.predict(X_test)),3)}")
+    print(f"==={name}===")
+    y_pred = clf.predict(X_test)
+    print(f"Precision: {round(precision_score(y_test, y_pred ),3)}")
+    print(f"Accuracy: {round(accuracy_score(y_test, y_pred ),3)}")
+    print(f"Recall: {round(recall_score(y_test, y_pred) ,3)}")
+    print(f"F1-Score: {round(f1_score(y_test, y_pred ),3)}")
 
-clf.fit(X_train, y_train)
-
-y_pred = clf.predict(X_test)
-
-y_pred = np.reshape(y_pred, (y_pred.shape[0],1))
-
-print(y_pred.shape)
-
-y_pred = clf.predict(X_test)
-
-precision = precision_score(y_test, y_pred)
-recall = recall_score(y_test, y_pred)
-accuracy = accuracy_score(y_test, y_pred)
-f1 = f1_score(y_test, y_pred)
-
-print("Precision:", precision)
-print("Recall:", recall)
-print("Accuracy:", accuracy)
-print("f1:", f1)
 
 # feature importance
 from matplotlib import pyplot as plt
@@ -147,3 +135,11 @@ plt.bar(range(len(clf.feature_importances_)), clf.feature_importances_)
 plt.title("Feature Importance (XGB)")
 plt.savefig(f"{output_path}/feature_importance.png")
 plt.close()
+
+# k-fold 交叉驗證
+from sklearn.model_selection import cross_val_score
+scores = cross_val_score(clf, X, y.values.ravel(), cv=5, scoring='accuracy')
+print("Cross-validation accuracy:", scores.mean())
+
+# 輸出模型
+joblib.dump(classifiers[-1], "xgb_ecg_model.joblib")
